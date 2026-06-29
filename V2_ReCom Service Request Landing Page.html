@@ -1,0 +1,831 @@
+<!--
+  ReCom Consulting Ltd. — Lead capture landing page
+  =================================================
+
+  HOW TO CONNECT THINGS (edit the CONFIG block in the <script> at the bottom):
+
+  1) VIDEOS
+     Set CONFIG.videos.overview.url and CONFIG.videos.pf.url to a YouTube
+     embed URL (https://www.youtube.com/embed/VIDEO_ID) or a direct .mp4 URL.
+     Leave them empty to keep the "video coming soon" placeholder.
+
+  2) FORM DESTINATION (where submitted data goes)
+     Set CONFIG.formEndpoint to your collector:
+       - Formspree:  "https://formspree.io/f/XXXXXXXX"
+       - Your API:   "https://yourdomain.com/api/leads"
+       - Google Apps Script web app URL, etc.
+     The form POSTs JSON. If left empty, the page just shows the success
+     screen (good for previewing the design).
+
+  3) LIVE STATS / CATCHY LINES
+     Edit the three lines in CONFIG.stats. They are placeholders.
+
+  No external dependencies except Google Fonts. No cookies, no storage.
+-->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ReCom Consulting Ltd. — Payroll, Provident Fund & HRMS</title>
+<meta name="description" content="ReCom Consulting Ltd. manages payroll, provident fund and HRMS for growing organisations. Tell us what you need and a specialist will reply within one business day." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg:        #f5f7fb;
+    --bg-2:      #eef1f7;
+    --surface:   #ffffff;
+    --surface-2: #ffffff;
+    --line:      rgba(16,24,40,0.10);
+    --line-2:    rgba(16,24,40,0.17);
+
+    --text:      #14181f;
+    --dim:       #5a6472;
+    --faint:     #97a0b0;
+
+    --blue:      #2b88c3;
+    --blue-br:   #3ba3e3;
+    --blue-ink:  #1d6a9e;   /* deeper blue for text accents on light */
+    --crimson:   #c72235;
+    --crimson-br:#e23a50;
+    --violet:    #7a4d9e;
+
+    --r-sm: 8px;
+    --r:    14px;
+    --r-lg: 20px;
+
+    --maxw: 1240px;
+    --font-d: "Inter", system-ui, sans-serif;
+    --font-b: "Inter", system-ui, sans-serif;
+    --font-m: "Inter", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-b);
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /* atmosphere: brand glows + faint square grid, all behind content */
+  .atmos {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 84% 4%,  rgba(43,136,195,0.13), transparent 70%),
+      radial-gradient(55% 55% at 8% 96%,  rgba(199,34,53,0.10),  transparent 72%),
+      var(--bg);
+  }
+  .atmos::after {
+    content: ""; position: absolute; inset: 0; opacity: 0.6;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(80% 70% at 50% 30%, #000 0%, transparent 80%);
+            mask-image: radial-gradient(80% 70% at 50% 30%, #000 0%, transparent 80%);
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
+
+  /* ---------------- logo mark ---------------- */
+  .logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+  .logo svg { display: block; }
+  .logo-img { height: 42px; width: auto; display: block; }
+  .logo .word {
+    font-family: var(--font-d); font-weight: 500; font-size: 1.5rem;
+    letter-spacing: -0.02em; color: var(--text);
+  }
+
+  /* ---------------- nav ---------------- */
+  header.nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(14px);
+    background: rgba(245,247,251,0.72);
+    border-bottom: 1px solid transparent;
+    transition: border-color .3s, background .3s;
+  }
+  header.nav.scrolled { border-color: var(--line); background: rgba(245,247,251,0.9); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 74px; }
+  .nav-links { display: flex; align-items: center; gap: 30px; }
+  .nav-links a {
+    color: var(--dim); text-decoration: none; font-size: 0.95rem; font-weight: 500;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 999px;
+    font-family: var(--font-b); font-weight: 600; font-size: 0.92rem;
+    color: #fff; text-decoration: none; border: 1px solid var(--line-2);
+    background: linear-gradient(135deg, var(--blue), var(--crimson));
+    transition: transform .2s, box-shadow .2s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(199,34,53,0.28); }
+  .menu-btn { display:none; background:none;border:1px solid var(--line);color:var(--text);
+    border-radius:10px;padding:9px 12px;font-size:1rem;cursor:pointer; }
+
+  /* ---------------- hero ---------------- */
+  .hero { padding: 58px 0 84px; }
+  .hero-grid {
+    display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 56px; align-items: start;
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-m); font-size: 0.78rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--dim);
+    padding: 7px 13px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--surface);
+  }
+  .eyebrow .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--crimson-br); box-shadow: 0 0 0 0 rgba(226,58,80,0.6);
+    animation: pulse 2.2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(226,58,80,0.55); }
+    70% { box-shadow: 0 0 0 8px rgba(226,58,80,0); }
+    100% { box-shadow: 0 0 0 0 rgba(226,58,80,0); }
+  }
+
+  h1.headline {
+    font-family: var(--font-d); font-weight: 700;
+    font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.05;
+    letter-spacing: -0.025em; margin: 22px 0 0;
+  }
+  h1.headline .grad {
+    background: linear-gradient(100deg, var(--blue), var(--crimson));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub {
+    margin: 20px 0 0; max-width: 36em;
+    color: var(--dim); font-size: 1.06rem; line-height: 1.6;
+  }
+
+  /* stat lines — brand squares as bullets */
+  .stats { margin: 30px 0 0; display: flex; flex-direction: column; gap: 13px; }
+  .stat { display: flex; align-items: center; gap: 13px; }
+  .stat .sq {
+    flex: none; width: 13px; height: 13px; border-radius: 3px;
+    background: linear-gradient(135deg, var(--blue), var(--crimson));
+    box-shadow: 0 0 14px rgba(43,136,195,0.35);
+  }
+  .stat .txt { font-size: 0.99rem; color: var(--text); }
+  .stat .num { font-family: var(--font-m); font-weight: 700; color: var(--blue-ink); font-variant-numeric: tabular-nums; }
+
+  /* video player */
+  .video-card {
+    margin: 38px 0 0; border: 1px solid var(--line); border-radius: var(--r-lg);
+    background: var(--surface); overflow: hidden;
+  }
+  .video-tabs { display: flex; gap: 4px; padding: 8px; border-bottom: 1px solid var(--line); }
+  .video-tab {
+    flex: 1; padding: 11px 12px; border-radius: 10px; border: none; cursor: pointer;
+    background: transparent; color: var(--dim);
+    font-family: var(--font-b); font-weight: 600; font-size: 0.9rem; text-align: left;
+    display: flex; align-items: center; gap: 9px; transition: background .2s, color .2s;
+  }
+  .video-tab .tnum { font-family: var(--font-m); font-size: 0.78rem; opacity: .8; }
+  .video-tab:hover { color: var(--text); }
+  .video-tab.active { background: var(--surface-2); color: var(--text); }
+  .video-stage {
+    position: relative; aspect-ratio: 16 / 9; background: var(--bg-2);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .video-stage .poster {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(70% 90% at 78% 12%, rgba(43,136,195,0.18), transparent 60%),
+      radial-gradient(70% 90% at 18% 92%, rgba(199,34,53,0.15), transparent 62%),
+      var(--bg-2);
+  }
+  .video-stage .poster::before {
+    content: ""; position: absolute; inset: 0; opacity: .5;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    -webkit-mask-image: radial-gradient(60% 60% at 50% 50%, #000, transparent 75%);
+            mask-image: radial-gradient(60% 60% at 50% 50%, #000, transparent 75%);
+  }
+  .play {
+    position: relative; z-index: 2; display: flex; flex-direction: column;
+    align-items: center; gap: 14px; background: none; border: none; cursor: pointer;
+    color: var(--text);
+  }
+  .play .disc {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--crimson));
+    display: grid; place-items: center; box-shadow: 0 12px 40px rgba(199,34,53,0.4);
+    transition: transform .25s;
+  }
+  .play:hover .disc { transform: scale(1.07); }
+  .play .disc svg { margin-left: 4px; }
+  .play .label { font-family: var(--font-d); font-weight: 600; font-size: 1.02rem; }
+  .play .meta { font-family: var(--font-m); font-size: 0.74rem; color: var(--dim); letter-spacing: .05em; }
+  .video-stage iframe, .video-stage video { position:absolute; inset:0; width:100%; height:100%; border:0; z-index:3; }
+
+  /* video popup */
+  .lightbox { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .lightbox.open { display: flex; }
+  .lb-backdrop { position: absolute; inset: 0; background: rgba(10,14,20,0.74); backdrop-filter: blur(6px); }
+  .lb-inner { position: relative; z-index: 1; width: min(360px, 88vw); display: flex; flex-direction: column; gap: 12px; }
+  .lb-inner:has(.lb-media.wide) { width: min(860px, 92vw); }
+  .lb-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #fff; }
+  .lb-title { font-family: var(--font-d); font-weight: 600; font-size: 0.98rem; }
+  .lb-close { width: 34px; height: 34px; flex: none; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.28); background: rgba(255,255,255,0.08); color: #fff;
+    font-size: 1.4rem; line-height: 1; display: grid; place-items: center; transition: background .2s; }
+  .lb-close:hover { background: rgba(255,255,255,0.2); }
+  .lb-media { width: 100%; aspect-ratio: 9 / 16; border-radius: 16px; overflow: hidden;
+    background: #000; box-shadow: 0 30px 90px rgba(0,0,0,0.55); }
+  .lb-media.wide { aspect-ratio: 16 / 9; }
+  .lb-media iframe, .lb-media video { width: 100%; height: 100%; border: 0; display: block; }
+
+  /* ---------------- form card ---------------- */
+  .form-card {
+    position: relative; border: 1px solid var(--line); border-radius: var(--r-lg);
+    background: #ffffff;
+    padding: 30px 30px 28px;
+    box-shadow: 0 24px 70px rgba(16,24,40,0.10);
+  }
+  .form-card .corner-logo { position: absolute; top: 18px; right: 20px; height: 40px; width: auto; display: block; opacity: .95; }
+
+  .viewing {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-m); font-size: 0.74rem; color: var(--dim);
+    margin-bottom: 14px;
+  }
+  .viewing .dot { width: 7px; height: 7px; border-radius: 50%; background: #36d27a;
+    box-shadow: 0 0 0 0 rgba(54,210,122,.6); animation: pulse-g 2.4s infinite; }
+  @keyframes pulse-g {
+    0%{box-shadow:0 0 0 0 rgba(54,210,122,.5)} 70%{box-shadow:0 0 0 7px rgba(54,210,122,0)} 100%{box-shadow:0 0 0 0 rgba(54,210,122,0)}
+  }
+
+  .form-card h2 {
+    font-family: var(--font-d); font-weight: 600; font-size: 1.5rem;
+    letter-spacing: -0.02em; margin: 0; padding-right: 56px;
+  }
+  .form-card .form-sub { color: var(--dim); font-size: 0.95rem; margin: 8px 0 22px; }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 0.83rem; font-weight: 600; color: var(--dim);
+    margin-bottom: 7px; letter-spacing: 0.01em;
+  }
+  .field label .req { color: var(--crimson-br); }
+  .field .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  input, select, textarea {
+    width: 100%; font-family: var(--font-b); font-size: 0.96rem; color: var(--text);
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-sm);
+    padding: 12px 13px; transition: border-color .18s, box-shadow .18s, background .18s;
+  }
+  textarea { resize: vertical; min-height: 88px; }
+  input::placeholder, textarea::placeholder { color: var(--faint); }
+  select { appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239aa3b2' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 13px center; padding-right: 38px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--blue-br);
+    box-shadow: 0 0 0 3px rgba(43,136,195,0.18); background: #ffffff;
+  }
+  .field.invalid input, .field.invalid select, .field.invalid textarea { border-color: var(--crimson-br); }
+  .err { display: none; color: var(--crimson-br); font-size: 0.78rem; margin-top: 6px; }
+  .field.invalid .err { display: block; }
+
+  /* service chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip {
+    cursor: pointer; user-select: none;
+    padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--bg-2); color: var(--dim); font-size: 0.9rem; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 8px; transition: all .18s;
+  }
+  .chip .tick { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--faint);
+    display: grid; place-items: center; transition: all .18s; }
+  .chip .tick svg { opacity: 0; transition: opacity .15s; }
+  .chip:hover { border-color: var(--line-2); color: var(--text); }
+  .chip.on {
+    color: #fff; border-color: transparent;
+    background: linear-gradient(135deg, rgba(43,136,195,0.9), rgba(199,34,53,0.9));
+  }
+  .chip.on .tick { border-color: #fff; background: rgba(255,255,255,0.18); }
+  .chip.on .tick svg { opacity: 1; }
+  .chip-help { font-size: 0.8rem; color: var(--faint); margin-top: 9px; }
+
+  .submit {
+    width: 100%; margin-top: 8px; cursor: pointer;
+    padding: 15px 18px; border-radius: var(--r-sm); border: 1px solid var(--line-2);
+    font-family: var(--font-d); font-weight: 600; font-size: 1.02rem; color: #fff;
+    background: linear-gradient(135deg, var(--blue), var(--crimson));
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    transition: transform .15s, box-shadow .2s, opacity .2s;
+  }
+  .submit:hover { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(199,34,53,0.34); }
+  .submit:active { transform: translateY(0); }
+  .submit[disabled] { opacity: .65; cursor: progress; }
+  .submit .mini-grid { display: inline-flex; }
+  .privacy { margin: 14px 0 0; font-size: 0.8rem; color: var(--faint); text-align: center; line-height: 1.5; }
+
+  /* success overlay (the grid completes) */
+  .success {
+    position: absolute; inset: 0; z-index: 5; display: none;
+    flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: 34px; border-radius: var(--r-lg);
+    background: #ffffff;
+  }
+  .success.show { display: flex; }
+  .success h3 { font-family: var(--font-d); font-weight: 700; font-size: 1.7rem; margin: 22px 0 0; letter-spacing: -0.02em; }
+  .success p { color: var(--dim); margin: 10px 0 0; max-width: 22em; line-height: 1.55; }
+  .success .again { margin-top: 22px; background: none; border: 1px solid var(--line-2); color: var(--dim);
+    padding: 10px 18px; border-radius: 999px; cursor: pointer; font-family: var(--font-b); font-weight: 600; font-size: .9rem; }
+  .success .again:hover { color: var(--text); border-color: var(--text); }
+
+  .success .complete-logo { height: 64px; width: auto; display: block; }
+
+  /* ---------------- services ---------------- */
+  .services { padding: 30px 0 90px; }
+  .sec-head { max-width: 40em; }
+  .sec-eyebrow { display: block; font-family: var(--font-m); font-size: 0.82rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--blue-ink); font-weight: 600; }
+  .sec-head h2 { font-family: var(--font-d); font-weight: 700; font-size: clamp(1.8rem,3vw,2.4rem);
+    letter-spacing: -0.025em; margin: 12px 0 0; }
+  .sec-head p { color: var(--dim); font-size: 1.08rem; margin: 14px 0 0; max-width: 46em; }
+
+  .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 38px; }
+  .svc {
+    border: 1px solid var(--line); border-radius: var(--r-lg); padding: 26px 24px 24px;
+    background: var(--surface); position: relative; overflow: hidden;
+    transition: transform .25s, border-color .25s, background .25s;
+  }
+  .svc::before {
+    content: ""; position: absolute; left: 0; top: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--crimson));
+    transform: scaleX(0); transform-origin: left; transition: transform .35s;
+  }
+  .svc:hover { transform: translateY(-5px); border-color: var(--line-2); box-shadow: 0 18px 44px rgba(16,24,40,0.10); }
+  .svc:hover::before { transform: scaleX(1); }
+  .svc .ico { width: 46px; height: 46px; }
+  .svc h3 { font-family: var(--font-d); font-weight: 600; font-size: 1.22rem; margin: 18px 0 0; letter-spacing: -0.01em; }
+  .svc p { color: var(--dim); font-size: 0.95rem; line-height: 1.6; margin: 10px 0 0; }
+  .svc .tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
+  .svc .tags span { font-family: var(--font-m); font-size: 0.72rem; color: var(--dim);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+
+  /* ---------------- footer ---------------- */
+  footer.foot { border-top: 1px solid var(--line); padding: 40px 0; }
+  .foot-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; }
+  .foot .meta { color: var(--faint); font-size: 0.86rem; }
+  .foot a { color: var(--dim); text-decoration: none; }
+  .foot a:hover { color: var(--text); }
+
+  /* ---------------- responsive ---------------- */
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .form-card { order: -1; }       /* form first on tablet for conversion */
+    .svc-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px) {
+    .wrap { padding: 0 18px; }
+    .nav-links { display: none; }
+    .menu-btn { display: inline-block; }
+    .hero { padding: 40px 0 60px; }
+    .field .row { grid-template-columns: 1fr; }
+    .video-tab { font-size: 0.82rem; }
+    .video-tab .tnum { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+
+<!-- shared gradient defs for the logo mark -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="recomGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"  stop-color="#3ba3e3"/>
+      <stop offset="48%" stop-color="#2b88c3"/>
+      <stop offset="100%" stop-color="#c72235"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="atmos" aria-hidden="true"></div>
+
+<!-- ===================== NAV ===================== -->
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#top" aria-label="ReCom Consulting Ltd. home">
+      <img class="logo-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOoAAABeCAYAAAAtz4gtAAAWgUlEQVR42u1dbXBc1Xl+zkoQN9jbYRimE3Ntk6GheJU/6UzFFcMw7dTIxuRHCuuRbKSMkQdB2xkkI9mdJkauZP9IbCnSOvwgBikk8mA7Upy0abC1pmkGbHatNtMA3cXgelxbiwi4BLLYxdOE+/bHPefuuat7735o9x4Tn2dmZz/ux7733vOc9+O85z2AhoaGhoaGhoaGhoaGhoaGhoaGhobG7w9Y0MbBXbvvu3/Dwy8AAHntztwfKGCbALl+ZiUkY4guuQ6rjRtZORdz6uxFcp+DlXcLWE1uF6JLGrH6c1Gmm5VGaER98/xFevSb/4T8x//nNHhiDCQaNv9MTBBC2keQkDGbmPyd8XeSvjv7SOctnMv+/a/+7FZ8Y2Ozr6xvvP0h/e3kLN7+4H9hn1LqOLicTO44ighMjCEidRzkRXDGeN/B3B1S0W1svvVG3DaXXL9zx9eO6ualUStE/Db07zuKy5evIEIE8BcjQgT2OywCIwsRIjCLALIAvo0RgcH+zflOBCICAxAhcs5Llr0PQDazLAI55wIYCD/6t3M4MnuO/GT9xk9ew/wHl8BAsEWz3xnA/9uy/4vTl4lrEjQjgmXZ8snX4GYzgcCvYYEk5NgKs//9AW5d89ALumlp1BKNfhveufgbR1MINlu8wdqaECBidsO2dZbNZ2Z/tlUm14qCNACICMSYfQ5+LiKbpIzxbWRvE+diYHj715d9LyJ99qK9FyOAEUDMoQ7j2pQE+RiDJaxdKtKWRLDsXewXFbRyQUXbcoFsuYgtNOz/5c2LumVphENUZtnsIgDL/uB63L7qZk485vZXHfNWMoelxu+Yn45pWdhfNocd85ibwL/5+Lc4/faHEpso8EKIa9MIGJpvu8npPgTPXOYw717A7E6IPM1h0UH5m8PEGCIA8ld+hzfe/cjLE9fQqC9RiZt+jIA/WXkTnv77r4QaJDl15le0+amfFSzUgLYfsSzuGzNYRPjeo/eEK+u592nz9/7dx3/V0KinRuU+nfDLQgfB9l8dbewvg8V9X2HaqgBxH5tBB301VGhURZacE/sV/iuVoInkBytiKgCC5Ti2GhohaVTwwA9ITcuLiEhtid6COUEeZaK6ZSHNVI0ac8FfQ5BDWDWel3s4J1AEeThHEUmYJqeGCo0qTE4+pqJOo4rhnFJmJ3H7mKkyfgna6tVQo1HFy1Lk87k0apDpa2tUqDI7+fgrQQpqaWiEplFdrAnZlISIPDujqwGikpM6rIojjFsgFuMRYA2NUIhqiVCrqtYvUhHhDBMFmsiCsEzt8Ajj6YsaGqEQlZFEDVUtjyxHmwaZk2IYx0lHVEVQoJCOqKERBlGJrILBqSjhgbmGZwJgWcoJYjn+KfTwjIYKjUpQFct0TN8SjZ9JnYkSsorZQWCCqbplaYSlUcsjSX19VOF3UonhmYL2V0URZ6oen0WkoRGiRpWmrIXd8MGHXRizp9MFDs+QazqdIqVamE6nNapGWEQVY5hCY6nwUYVJyUr4n4xP5iY+n1UNUbnprYNJGnVAJMicJEskGqjLTCok5lOwOuOmckRV1NdVXUJrVI2wNKpFPBtPUWYSbHJGykghjPCxSxLjvqp8VFFdQvNUIyyiRohgwW54KsdRnSoNJTQqY1AXSSKy58QS44EvS7csjXCIej0s/I5Ek1Pjo8rlYKhUMEllPr4jMqn0FDSuRaI28KpDFhgaSFGzl8ZGSwaTWGlXtq7+tFQORvNUI2SiMjAQGqE2LY9KBWhEOVPGlI3PyOVg9OwZjdCI2sh9VIsxRKCoZlKZ2UYNROAT3RSRhE8bkGoJa2iEpFHtbB9GtnZVpVEFDYJsWpFFpSyeRO5yMJYmqka4pq890NqgSkuV6aOKWTZA0MBwvcXlEwNIJzxohGn6wjYnLZAy07fscjB8zJecGgtQJ69OytcIX6PaAaWIqoYnk5OC9yOlwSR7fRu7YiOzJ91raIRCVD4jJcLU+KgMVHY5GFF4W1nqHrnLwWiNqhG6j2qJldcUWJLucjBBCrXgy6qgiCjA5pSD0TzVCE+jctOXMbz/7q8x9f1jJNZDlSdyic8U8NmSjnNatufngt36wr++7i4HU0qjUmHmzP7pFMnrwDA5CaF48Srpd9e/FK2x6tL1RYs0//jUWVc5GK1RNUIjakQanvngV+/jRweSfKySwWKMB5qY9OLbFmy33z/hL4tJpHReBQIwsQAyXx2O8SUUS8+eKVR62P/DdIGQjDlkBc8ckv+fpH3gZBb5LdYs5HQv1oyiTkBn5WuERtRlNyzBpctXbPMXcOaFOmuk8nVH7SEcckjpZOdI28ViixEwfEIMnzB5hglP/JfiQE6BUD4hnAFYdsNnfC/iczctwzv/ky+QRZih/LPsv9rkLSi9iLAA+D6CkyIdkTF57VfOTUJRdcTCeq8EYPUtN+qWpVFT+A47tv/1A2gEoQGEBliIgNBAhAay+G/290b5O99XfG4kfgwIjbCHfK4D4Tqy7GAVWbYfSnzFcquwsjnIchYf/sKqm/HWfyTX+8n6xOa/kIqFW4UJ55blpB8yaYVze7X0wn+ACBHLKhT65qugMz7H1XN1dfJeXf0Pl1yHjj+/Q7csjZrHQXzx5i/fojdfOwOiMnxTVvx7bXzXpTcswZlXj6/fObDjaJCs8+99SP/884zLDJU/OzNVZd+Vq3EK8l2LjqcA33XpZ6/HuVd+vH7nk18/qpuWhoaGhoaGhoaGhoaGhoaGhoaGhhIERn37tj5h/s1Xu1OF9V/c0VAxMlnWb3J0F/JCGe6MIDmqDAA3LF2CL9y2XM8c09BE9cL8mfP0zBN78fGlj+1hFAAWz9wRWUgiS4mkzCR7O3NlJYntFt/m7O+xr+s737723j/F3/U9qMmqcc3CN+Hh4JPfxm8vXbYTHfic1AaeoN9A9nf7NwsRnuQQASHCkxnkxAex3U6QkJIiaGGShP3ZQiNPmGgE4fjxX+BY8hc6L0/jmoVvCuFH77yHCIvYlQiZXeZMpBKKJZks8OLYvEY3Y+RoXzvNzk47jEjphRZE/VspNZFPp/uEpxna2tWdjvjeux+UvJhUKuWQeXZ2trOnp+eAvD2RSHQsX758cjadRi6XQzabBQDEYjEAwJ2midWxGE6fPr3gWD/Mzc1ROp3G6WwW2WwWuVwOuVzO2R6NRhGLxRCNRtFsmjBNE01NTXWzDubm5iiZTDryiGuUEYvFYBgGmk0Tra2tWLFiBauXDOI+5/N5Z7thGDAMA7FYDHfEYjBNs2oZEolER3Nz86T43tLSwkrJ9WIyueA5mabpPKNLly6V/fyLz13ctuTrvdM08WA8XtW1+h4wdE8nCdP0M8tuwB/98SqeRVQwZ+WsJJLMYTmLiZxEfOYUIJOPt4oymYQpfenyFZw9O++Ywps6/hIdnfeyIJJuam933fiDhw87+4+NjtJ3JyZcDcYP0WgUr77+euDNnJqaoiPT00in0xU3LsMw8GA8DhaJVNwg6iFPLBbD5q4ubNiwgS1WhucmJjw7h1IwTRMPxOMVyzA2OkqJsTHn+46BAWzZsoUVk2jf2Bimp6fLPm88HoexcmXJ51PNuU3TxI6BgYo6bN8dd9/zkMh2xcovrcbmxNdC9RH/89X/ooHt33H81baOe/FQBUQFgHPnz7NMJkPb+/srajyGYeDlkyeZ3//sHhqqqjF6dQiP9/YuaFiVIJVK0fb+fpd2qBaGYWDP8HCgVvLCzMwM7R4aUiJDMVHj8Tj2jowwufPYPTRUVgft9Xye3r/fV5bx8XHaNzZW1bkBYM/wcNkdk6+PGiHb37T9TjVRLtl/raYczNTUFG1qb6+YVKZp+jaKas7nh3w+j91DQ9jY1kaJRKKj0uN3DQ7Spvb2mhAEAHK5HDa1t2PX4GBZNzuRSHRs6+ujx7q7lcngdbz8/Lf391dNpHw+j03t7S6XSmBbX1/VHYDA9v5+jI2O0qKI2uCQ1A4WKYl0keUEnKoharUPqdmDqNv6+lw9dy2RTqeRPHZsslyyJhKJjo1tbTQxMVEXeSYmJvDoI48Edh6JRKIjeezYZCUmX6UyVNOBCdNfWBq1wGPd3ZibmyO5LdTquhNjY5iZmSnZuAMXiWIkAkkKaiZxgjqBqRqJIHwhwzAQjUaRz+eRzWYxm04jmUwCAObn5zuLSRr0YKLRKFpbW9FsmjAMw2UqpVIpyufzeDGZRDKZ9O04uJaeTCQSKOUXpV95ZTLIFxXy3BGLOYGy2dnZThF0Kb5eL/BtkwAO+JE0yLIwDMO5J9FodME9yeVyjgx+94Rfo6cMQchkMgvcoOLnLwewUqkUZbNZPDcx4WkZ5PN5CNKPj4/T7qGhwHPHYjHH/8xkMpTNZhEUP9g9NIREItER9NwDKzwQnwOmomYSg10Ohng0ebGVEGV/4+Dhw75aYs2aNZNNTU0H/Hyg4nM+3NUVGBQq9m+mpqZo39iYZ4PIZrMwDCOwYe4aHPTVpNFoFDsGBjA/P+8nz4IoOFnWpF+QLZlMYmx0lHq3bnVdQ+7CBV+SGoaBx3t7sWHDBvbyyZModU9KyZBOp7FrcJCe3LmzbL/Zy5KSfd/i5y/L4/e80+m0L0mDzi0HjFKpFD3W3b1Atlwuh6VLlwY+d9+LH70rTqLywS1fakL7U/8QajDpjV+eoW9ue8qJDH+lcx0e/Oq6ioJJcgN+/tChiodFMpkMfXn9et/e07zrrqqitolEoiN34YKv2fj0/v1Yu3Ytq+QaW1tbEfviF6uSZ25ujrb39/v2+C+dOOFon5mZGXqsu3tRkVK/exJkKTx/6JBnUCeoIxWIxWJoXbeubLmCtOZiz+3XpoICmGUEk/hLgX/K5MoSrinrlaMakgqTxK9BHjx8mFU7tNLT03Ng78gI6+ntreh//XyueDyO7zzzTNXyrFixgh08fJjF43HPhnjkyJHOUrLtGR7G3pGRRd0TPxmCrr3WRAKALVu2ML+A4gLzvsJzNzU1eT73XC6HTCZDVQSTJKKSpYCodumWRlQfTAKAnt7eqkiaSqXIq3c3TdMV/l8Merdu9WyYuVwOU1NTVGwye5nLxcMRi8HekRFXAzVN09UQg2RY7BisnwxB96Qc7BkeRjWdx+aurpL7PL1/f1XnZpFIZzQa9Q2EVaZRIaK+apYRZE7U1+KatTq/lEUindX8/xEPszQajWLP8HBNr9NYubLTMIyS//+ch19qGAaMlSs7aynPnuFhRKNRdHV1LbAa9nmYmPWUoRgvBgS/atlJA8DatWuZlwxy51TtuXt6eg60trYu+P10QHCutOlbJUkWDzmfuLrOIhaLoVpTzMt/fLirq+bpdj09PQce9zCF0uk0xNDE3NwceQVvHu/tRa0ym2Qz+NXXX2fFwZtMJuOpTeslw8MeGi2ZTKKS4ZpqO2nZovDD4z5uS7m4g0fji62GiolqV92zlGrUBhJ+qhXqEJHXAHctHrwfNmzYwLy06vLlyydFA/XSZLUyN8uBl1lWTxn87rW4J6UQj8cX3YGs9iCTUACL7bBjHufOVqVRpdkwKnxUx/yWZuuEhVMejbK1tbXmmqP4/H6m0KyPPGEibBmqMQ9lrKmjbA/4BLwqdcuKEZScU1YKoYqJoAzu6XRhyvCGR2Pw611rBa9sKNHDej3A5jKikrWEl1lWbxlWV6h1in3Mxf7/nT7XZ9bguiv1bwMykyxnUERFCiHjiRbO1LgQNaoXMY4nk9jY1lY3IbwCNYIcXmZnrM4dRzkEqbcMXkQpJyXUNE2cO3++bnLVc5piFUQlZ2FgpmgtlQaQvawEoHyFtFol4i9Wi8kBFyiGChnKeQ5e/n6tYBhGXTuBqjWqBVUphPb4qSX5zBoa5eCWOhNVBUpoVF6lQeE4KuPVJXTBJI1rGSXHUZ1FkFSYvk6NJkuZDCoR1HtXM3+11lAhgyqNphqNQaYnQIgQUzRx3I46M16KhSlec9SrxEe9IXyhWCy2wDfjU9YOhCWLChm8/NFrlahlZCYJT1WFcJYzjhumj+oVbZytohZRPbXIqZDl8Rr3q7cMsz5JFpqoLqIWcn2VBJOkSQENYp3SkOA1fldp+lq95flhnSorVNJ5Ha8w97ZSs9prWOqOkIelrn6iWmJxX0tZIEeUgbFlCE+rnz592jN9jSxrUsV9uNcjyyaXy/mmOoYlQzabrZsMy5cvn/QaMw07I+vToVF5MEllhQeRIRVmZ+GXvvbdiQlX7Zyw0NTU5JkLvK9ONZzGRkepuI5PmDIkEokOr/PWIsf2946ojAjMIkQse9n78InKK+wrmhjgNR8xn8/Dr7pBvfGgR36pKA9Sy//ZNThIibExPNbdvWD+Z1gy5C5cmPRK9ihnjui1afo6M2hUmb4i1zf84ZmWlhbPCczZbBbb+vpqJoyoKFiq6p/fZOPdQ0NVTaj2wtTUlKse0/b+fte1hiXDtM9c4OKic5qokukbsQiM1OX6Riy7ZKgKe8dvzuH09HTVtXhlZDIZmv7BDybTvBpfUMnQnp6eAw/7aJTt/f2L1mrj4+Oe5TWnp6cdc7+UDIsl667BQd8SnzsGBuo6e+lTTFSR8GApGsMkV90mFTK0tLT41jVKp9OYePbZybHR0YoJm0gkOsZGR+nL69e78nmz2WwgWXu3bmV+ifCikHelPnQqlaKNbW2BJTBlvzBIhu39/VXLcP999/lWVzRNM9S5t58yH9Xik8fVVcpXXQ5GNEy/glv5fB6JsTFMPPvs5La+PpqZmfEl7dzcHE1NTdG2vj4a+9a3Jv0q52WzWaxZs8Y3uvz0/v3wKxGSTqdxz913Y2NbG01NTfkSJpPJ0Pj4OG1sa6NN7e2+tXpisRjMu+7qrEaGRx95pCwZ7r/vvsDVB/xkuNbQGBRMEoS5kpvHmX3PEDHmXmiYiUWK+WLEznZ7oShnPxT28zpefIa0YNRbP/2Zk29MjJTm+u4dGWFBRbjz+Tymp6dF+ZbJz69aNSlW8BKrht1z991l/dee4eHAaVQrVqxgosB0UOFqQb7Pr1pFxbL4lUAt9gm5LAeqkSHJC44XyyBWdlusDJqoUjCJmE2SK7m3cfbbz9pE5GQjxpyFi+39mPvFyWqBAUyMgoqFj4uOB4qOs9MGIyisEKc613fvyAgLKn5djOJl/cpplDsGBsoy8Zqamipa/KpSWUSJzSCCXA0yaNMXwHXLltoJDxY3PUFF5nDhO7N48r5l8WMsx7dt4PuJc0Sk450qElQ4vvAfllQOhrBk6WeV36wnd+5kzx86VPM0NtM08fyhQxX5YU1NTax13brOrhoPWfT09uKnR4+WVZ/3apDhmifq7TuesMkjE7CIoHI+sENokSRhFSLGzj5SaRWZpGKGTKQogCT2ufn2W/GTt15dfzXcsJaWFvbyyZNsz/DwoiscCIIePHyYVVM1oKen58CTO3eyl06cQHyRdXzi8TheOnECxctXfBpkuBYQeEM+ypymi8mfg7gPClbkm6LYNy34p36+q8svLcN3vX7ZUvzjmdfWf33nwNFSkdTiFL/VsVhNaucEIZPJ0PFkEqfS6QUra3uZt6Zp1m2lb7Gi+ovJpLP6uR8Mw3BkCVirZlEypNPpwPtRCxnE/Zdxb2trTcql1LtNjY+P00fS/VkWjfrO0NI9Vx3glf9a6eLA9ZIlGo2GXvPnapBBQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0ND4+rB/wNBlzugpXWTkgAAAABJRU5ErkJggg==" alt="ReCom Consulting Ltd." />
+    </a>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="wrap hero-grid">
+
+    <!-- LEFT: pitch + videos -->
+    <div class="hero-left">
+      <span class="eyebrow"><span class="live-dot"></span>Provident&nbsp;Fund · Payroll · HRMS</span>
+
+      <h1 class="headline">
+        Run payroll, provident fund<br>
+        and HR <span class="grad">without the headaches.</span>
+      </h1>
+
+      <!-- THREE CATCHY LINES (placeholders — edit in CONFIG.stats) -->
+      <div class="stats" id="stats">
+        <div class="stat"><span class="sq"></span><span class="txt"><span class="num" id="counter" data-target="247">0</span> HR &amp; finance teams reviewed ReCom this month</span></div>
+        <div class="stat"><span class="sq"></span><span class="txt">Trusted with payroll for <span class="num">25,000+</span> employees</span></div>
+        <div class="stat"><span class="sq"></span><span class="txt">Provident fund &amp; payroll filed <span class="num">on time</span>, every cycle</span></div>
+      </div>
+
+      <!-- TWO VIDEOS (tabbed player) -->
+      <div class="video-card">
+        <div class="video-tabs" role="tablist">
+          <button class="video-tab active" role="tab" data-video="overview" aria-selected="true">
+            <span class="tnum">01</span> Company overview
+          </button>
+          <button class="video-tab" role="tab" data-video="pf" aria-selected="false">
+            <span class="tnum">02</span> Provident fund: benefits &amp; rules
+          </button>
+        </div>
+        <div class="video-stage" id="stage">
+          <div class="poster" aria-hidden="true"></div>
+          <button class="play" id="playBtn" aria-label="Play video">
+            <span class="disc">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+            </span>
+            <span class="label" id="vidTitle">Who we are, in 90 seconds</span>
+            <span class="meta" id="vidMeta">WATCH · OVERVIEW</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: lead form -->
+    <div class="form-card" id="contact">
+      <img class="corner-logo" src="Recom-Logo-Web-2.png" alt="ReCom" width="40" height="40" />
+
+      <span class="viewing"><span class="dot"></span>9 people viewing this now</span>
+      <h2>Tell us what you need</h2>
+      <p class="form-sub">A specialist replies within one business day. No obligation.</p>
+
+      <form id="leadForm" novalidate>
+        <div class="field" id="f-name">
+          <label for="name">Full name <span class="req">*</span></label>
+          <input id="name" name="name" type="text" placeholder="e.g. Tahmid Rahman" autocomplete="name" />
+          <span class="err">Please enter your name.</span>
+        </div>
+
+        <div class="field" id="f-company">
+          <label for="company">Company name <span class="req">*</span></label>
+          <input id="company" name="company" type="text" placeholder="e.g. Acme Industries Ltd." autocomplete="organization" />
+          <span class="err">Please enter your company name.</span>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <div id="f-size">
+              <label for="size">Company size <span class="req">*</span></label>
+              <select id="size" name="size">
+                <option value="" disabled selected>Select</option>
+                <option>1–10</option>
+                <option>11–50</option>
+                <option>51–200</option>
+                <option>201–500</option>
+                <option>501–1000</option>
+                <option>1000+</option>
+              </select>
+              <span class="err">Select a size.</span>
+            </div>
+            <div id="f-phone">
+              <label for="phone">Phone number <span class="req">*</span></label>
+              <input id="phone" name="phone" type="tel" placeholder="+880 1XXX-XXXXXX" autocomplete="tel" />
+              <span class="err">Enter a valid phone number.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" id="f-email">
+          <label for="email">Work email <span style="color:var(--faint);font-weight:500">(recommended)</span></label>
+          <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="email" />
+          <span class="err">Enter a valid email.</span>
+        </div>
+
+        <div class="field" id="f-services">
+          <label>Which services interest you? <span class="req">*</span></label>
+          <div class="chips" id="chips">
+            <span class="chip" data-val="Provident Fund" tabindex="0" role="checkbox" aria-checked="false">
+              <span class="tick"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M5 12l5 5L20 6"/></svg></span>Provident Fund
+            </span>
+            <span class="chip" data-val="Payroll Management" tabindex="0" role="checkbox" aria-checked="false">
+              <span class="tick"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M5 12l5 5L20 6"/></svg></span>Payroll Management
+            </span>
+            <span class="chip" data-val="HRMS" tabindex="0" role="checkbox" aria-checked="false">
+              <span class="tick"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M5 12l5 5L20 6"/></svg></span>HRMS
+            </span>
+          </div>
+          <p class="chip-help">HRMS covers payroll, leave, attendance and HR policy in one dashboard.</p>
+          <span class="err">Pick at least one service.</span>
+        </div>
+
+        <div class="field">
+          <label for="details">Requirements / details <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+          <textarea id="details" name="details" placeholder="Tell us about your current setup, team size, timeline or anything specific you need."></textarea>
+        </div>
+
+        <button class="submit" type="submit" id="submitBtn">
+          <span class="mini-grid">
+            <svg width="18" height="18" viewBox="0 0 100 100" fill="none"><rect x="6" y="6" width="40" height="40" rx="9" stroke="#fff" stroke-width="7"/><rect x="54" y="6" width="40" height="40" rx="9" stroke="#fff" stroke-width="7"/><rect x="6" y="54" width="40" height="40" rx="9" stroke="#fff" stroke-width="7"/></svg>
+          </span>
+          <span id="submitLabel">Send my requirements</span>
+        </button>
+        <p class="privacy">Your details are used only to prepare your proposal. We never share them.</p>
+      </form>
+
+      <!-- success state -->
+      <div class="success" id="success">
+        <img class="complete-logo" src="Recom-Logo-Web-2.png" alt="ReCom" width="64" height="64" />
+        <h3>You're on the grid.</h3>
+        <p id="successMsg">Thanks — a ReCom specialist will reach out within one business day to map out your requirements.</p>
+        <button class="again" id="againBtn">Submit another</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ===================== FOOTER REMOVED ===================== -->
+
+<!-- video popup (sized for vertical Facebook reels; widens for 16:9 sources) -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="lb-backdrop" data-close></div>
+  <div class="lb-inner" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="lb-bar">
+      <span class="lb-title" id="lbTitle"></span>
+      <button class="lb-close" id="lbClose" aria-label="Close video" data-close>&times;</button>
+    </div>
+    <div class="lb-media" id="lbMedia"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — edit these values to make the page live
+   ============================================================ */
+const CONFIG = {
+  // Video links. Overview is a landscape MP4 (plays inline); Provident Fund is a
+  // vertical/portrait MP4 (plays in the popup). Both must be hosted next to this HTML.
+  // Also supports Facebook reels/videos and YouTube embed URLs.
+  videos: {
+    overview: { url: "recom-overview.mp4",       title: "Who we are, in 90 seconds",        meta: "WATCH · OVERVIEW" },
+    pf:       { url: "recom-providentfund.mp4",  title: "Provident fund — benefits & rules", meta: "WATCH · PROVIDENT FUND", portrait: true }
+  },
+
+  // Where the lead data is sent. Leave "" to preview without a backend.
+  // Examples: "https://formspree.io/f/XXXX"  |  "https://yourdomain.com/api/leads"
+  formEndpoint: "http://localhost:5000/api/recom/leads"
+};
+
+/* ---- nav shadow on scroll ---- */
+const nav = document.getElementById('nav');
+addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8));
+
+/* ---- animated counter (the "live" catchy line) ---- */
+const counter = document.getElementById('counter');
+const target = +counter.dataset.target;
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { counter.textContent = target; io.disconnect(); return; }
+    let n = 0; const step = Math.max(1, Math.round(target / 45));
+    const t = setInterval(() => {
+      n += step;
+      if (n >= target) { n = target; clearInterval(t); }
+      counter.textContent = n;
+    }, 28);
+    io.disconnect();
+  });
+}, { threshold: 0.5 });
+io.observe(counter);
+
+/* ---- tabbed video player: landscape/MP4 plays inline, Facebook reels open a popup ---- */
+const stage = document.getElementById('stage');
+const playBtn = document.getElementById('playBtn');
+const vidTitle = document.getElementById('vidTitle');
+const vidMeta = document.getElementById('vidMeta');
+const lightbox = document.getElementById('lightbox');
+const lbMedia = document.getElementById('lbMedia');
+const lbTitle = document.getElementById('lbTitle');
+let activeVideo = 'overview';
+
+function resetStage() {
+  stage.querySelectorAll('iframe,video').forEach(n => n.remove());
+  playBtn.style.display = '';
+  stage.querySelector('.poster').style.display = '';
+}
+
+function renderVideoMeta() {
+  const v = CONFIG.videos[activeVideo];
+  vidTitle.textContent = v.title;
+  vidMeta.textContent = v.meta;
+  resetStage();                       // switching tabs returns to the poster
+}
+
+document.querySelectorAll('.video-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.video-tab').forEach(t => {
+      t.classList.remove('active'); t.setAttribute('aria-selected', 'false');
+    });
+    tab.classList.add('active'); tab.setAttribute('aria-selected', 'true');
+    activeVideo = tab.dataset.video;
+    renderVideoMeta();
+  });
+});
+
+const isFacebook = u => /facebook\.com/.test(u);
+const isFile = u => /\.(mp4|webm|ogg|ogv|mov|m4v)(\?|#|$)/i.test(u);
+
+/* landscape video / YouTube -> plays inside the on-page 16:9 frame */
+function playInline(v) {
+  const url = v.url.trim();
+  playBtn.style.display = 'none';
+  stage.querySelector('.poster').style.display = 'none';
+  if (isFile(url)) {
+    const vid = document.createElement('video');
+    vid.src = url; vid.controls = true; vid.autoplay = true; vid.playsInline = true;
+    stage.appendChild(vid);
+  } else {
+    let src = url;
+    if (/youtube\.com|youtu\.be/.test(src)) src += (src.includes('?') ? '&' : '?') + 'autoplay=1';
+    const f = document.createElement('iframe');
+    f.src = src; f.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture'; f.allowFullscreen = true;
+    stage.appendChild(f);
+  }
+}
+
+/* vertical content (portrait MP4 or Facebook reel) -> portrait popup */
+function openPopup(v) {
+  const url = v.url.trim();
+  lbTitle.textContent = v.title;
+  lbMedia.classList.remove('wide');
+  lbMedia.innerHTML = '';
+  let media;
+  if (isFacebook(url)) {
+    media = document.createElement('iframe');
+    media.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write; web-share';
+    media.allowFullscreen = true; media.setAttribute('scrolling', 'no');
+    media.src = 'https://www.facebook.com/plugins/video.php?href=' +
+                encodeURIComponent(url) + '&show_text=false&width=360&height=640&autoplay=true';
+  } else {
+    media = document.createElement('video');
+    media.src = url; media.controls = true; media.autoplay = true; media.playsInline = true;
+  }
+  lbMedia.appendChild(media);
+  lightbox.classList.add('open');
+  lightbox.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVideo() {
+  lightbox.classList.remove('open');
+  lightbox.setAttribute('aria-hidden', 'true');
+  lbMedia.innerHTML = '';            // removing the media stops playback
+  document.body.style.overflow = '';
+}
+
+playBtn.addEventListener('click', () => {
+  const v = CONFIG.videos[activeVideo];
+  if (!v.url) { vidMeta.textContent = 'ADD YOUR VIDEO URL IN CONFIG.videos'; return; }
+  if (isFacebook(v.url) || v.portrait) openPopup(v); else playInline(v);
+});
+lightbox.addEventListener('click', e => { if (e.target.hasAttribute('data-close')) closeVideo(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && lightbox.classList.contains('open')) closeVideo(); });
+renderVideoMeta();
+
+/* ---- service chips (multi-select) ---- */
+const chips = [...document.querySelectorAll('.chip')];
+function toggleChip(chip) {
+  const on = chip.classList.toggle('on');
+  chip.setAttribute('aria-checked', on ? 'true' : 'false');
+  document.getElementById('f-services').classList.remove('invalid');
+}
+chips.forEach(chip => {
+  chip.addEventListener('click', () => toggleChip(chip));
+  chip.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleChip(chip); }
+  });
+});
+
+/* ---- validation + submit ---- */
+const form = document.getElementById('leadForm');
+const submitBtn = document.getElementById('submitBtn');
+const submitLabel = document.getElementById('submitLabel');
+
+function setInvalid(id, bad) {
+  document.getElementById(id).classList.toggle('invalid', bad);
+}
+
+function validate() {
+  const name = document.getElementById('name').value.trim();
+  const company = document.getElementById('company').value.trim();
+  const size = document.getElementById('size').value;
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const picked = chips.filter(c => c.classList.contains('on'));
+
+  const phoneOk = /^[+]?[\d\s().-]{7,}$/.test(phone);
+  const emailOk = email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  setInvalid('f-name', !name);
+  setInvalid('f-company', !company);
+  setInvalid('f-size', !size);
+  setInvalid('f-phone', !phoneOk);
+  setInvalid('f-email', !emailOk);
+  setInvalid('f-services', picked.length === 0);
+
+  return name && company && size && phoneOk && emailOk && picked.length > 0;
+}
+
+// live-clear errors as the user fixes them
+['name','company','size','phone','email'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const map = { name:'f-name', company:'f-company', size:'f-size', phone:'f-phone', email:'f-email' };
+    document.getElementById(map[id]).classList.remove('invalid');
+  });
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!validate()) {
+    form.querySelector('.invalid')?.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+
+  const payload = {
+    name: document.getElementById('name').value.trim(),
+    company: document.getElementById('company').value.trim(),
+    companySize: document.getElementById('size').value,
+    phone: document.getElementById('phone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    services: chips.filter(c => c.classList.contains('on')).map(c => c.dataset.val),
+    details: document.getElementById('details').value.trim(),
+    submittedAt: new Date().toISOString()
+  };
+
+  submitBtn.disabled = true;
+  submitLabel.textContent = 'Sending…';
+
+  try {
+    if (CONFIG.formEndpoint) {
+      const res = await fetch(CONFIG.formEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Request failed');
+    } else {
+      // preview mode — no backend wired yet
+      await new Promise(r => setTimeout(r, 700));
+      console.log('Lead captured (preview mode):', payload);
+    }
+    showSuccess(payload);
+  } catch (err) {
+    submitBtn.disabled = false;
+    submitLabel.textContent = 'Try again';
+    alert('Something went wrong sending your details. Please try again, or call us directly.');
+  }
+});
+
+function showSuccess(payload) {
+  const success = document.getElementById('success');
+  const msg = document.getElementById('successMsg');
+  msg.textContent = `Thanks, ${payload.name.split(' ')[0]} — a ReCom specialist will reach out within one business day to map out ${payload.company}'s requirements.`;
+  success.classList.add('show');
+}
+
+document.getElementById('againBtn').addEventListener('click', () => {
+  form.reset();
+  chips.forEach(c => { c.classList.remove('on'); c.setAttribute('aria-checked','false'); });
+  document.querySelectorAll('.field.invalid, #f-size, #f-phone, #f-email, #f-services').forEach(el => el.classList.remove('invalid'));
+  submitBtn.disabled = false;
+  submitLabel.textContent = 'Send my requirements';
+  document.getElementById('success').classList.remove('show');
+});
+</script>
