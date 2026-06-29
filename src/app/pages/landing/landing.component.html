@@ -13,7 +13,7 @@
 <header class="nav" [class.scrolled]="navScrolled()">
   <div class="wrap nav-inner">
     <a class="logo" href="#top" aria-label="ReCom Consulting Ltd. home">
-      <img class="logo-img" src="recom-header-logo.png" alt="ReCom Consulting Ltd." />
+      <img class="logo-img" src="Recom-Logo-Web-2.png" alt="ReCom Consulting Ltd." />
     </a>
   </div>
 </header>
@@ -49,60 +49,29 @@
       </div>
 
       <div class="video-card">
-        <div class="video-tabs" role="tablist">
-          <button
-            type="button"
-            class="video-tab"
-            [class.active]="activeVideo() === 'overview'"
-            role="tab"
-            [attr.aria-selected]="activeVideo() === 'overview'"
-            (click)="selectVideo('overview')"
-          >
-            <span class="tnum">01</span> Company overview
-          </button>
-          <button
-            type="button"
-            class="video-tab"
-            [class.active]="activeVideo() === 'pf'"
-            role="tab"
-            [attr.aria-selected]="activeVideo() === 'pf'"
-            (click)="selectVideo('pf')"
-          >
-            <span class="tnum">02</span> Provident fund: benefits &amp; rules
-          </button>
-        </div>
+        <div class="video-header">Company overview</div>
         <div class="video-stage">
-          @if (!inlinePlaying()) {
-            <div class="poster" aria-hidden="true"></div>
-            <button type="button" class="play" aria-label="Play video" (click)="playVideo()">
-              <span class="disc">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
-              </span>
-              <span class="label">{{ activeVideoConfig().title }}</span>
-              <span class="meta">{{ activeVideoConfig().meta }}</span>
-            </button>
-          } @else {
-            @if (isFile(activeVideoConfig().url)) {
-              <video
-                [src]="activeVideoConfig().url"
-                controls
-                autoplay
-                playsinline
-              ></video>
-            } @else if (inlineIframeSrc()) {
-              <iframe
-                [src]="inlineIframeSrc()"
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                allowfullscreen
-              ></iframe>
-            }
+          @if (isFile(overviewVideo.url)) {
+            <video
+              [src]="overviewVideo.url"
+              controls
+              autoplay
+              muted
+              playsinline
+            ></video>
+          } @else if (overviewIframeSrc()) {
+            <iframe
+              [src]="overviewIframeSrc()"
+              [title]="overviewVideo.title"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen
+            ></iframe>
           }
         </div>
       </div>
     </div>
 
     <div class="form-card" id="contact">
-      <img class="corner-logo" src="Recom-Logo-Web-2.png" alt="ReCom" width="40" height="40" />
 
       <span class="viewing"><span class="dot"></span>9 people viewing this now</span>
       <h2>Tell us what you need</h2>
@@ -229,10 +198,10 @@
       </form>
 
       <div class="success" [class.show]="showSuccess()">
-        <img class="complete-logo" src="Recom-Logo-Web-2.png" alt="ReCom" width="64" height="64" />
-        <h3>You're on the grid.</h3>
-        <p>{{ successMessage() }}</p>
-        <button type="button" class="again" (click)="resetForm()">Submit another</button>
+        <img class="complete-logo success-item" src="Recom-Logo-Web-2.png" alt="ReCom" width="64" height="64" />
+        <h3 class="success-item">You're on the grid.</h3>
+        <p class="success-item">{{ successMessage() }}</p>
+        <button type="button" class="again success-item" (click)="resetForm()">Submit another</button>
       </div>
     </div>
   </div>
@@ -242,7 +211,7 @@
   <div class="lb-backdrop" (click)="closeVideo()"></div>
   <div class="lb-inner" role="dialog" aria-modal="true" aria-label="Video player">
     <div class="lb-bar">
-      <span class="lb-title">{{ activeVideoConfig().title }}</span>
+      <span class="lb-title">{{ overviewVideo.title }}</span>
       <button type="button" class="lb-close" aria-label="Close video" (click)="closeVideo()">&times;</button>
     </div>
     <div class="lb-media" [class.wide]="lightboxWide()">

@@ -13,7 +13,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
-import { LeadPayload, VideoConfig, VideoKey } from '../../models/lead.models';
+import { LeadPayload } from '../../models/lead.models';
 import { LeadApiService } from '../../services/lead-api.service';
 
 const SERVICE_OPTIONS = ['Provident Fund', 'Payroll Management', 'HRMS'] as const;
@@ -37,11 +37,10 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly companySizes = COMPANY_SIZES;
   readonly videos = environment.videos;
 
+  readonly overviewVideo = this.videos.overview;
+
   navScrolled = signal(false);
   counterValue = signal(0);
-
-  activeVideo = signal<VideoKey>('overview');
-  inlinePlaying = signal(false);
   lightboxOpen = signal(false);
 
   name = '';
@@ -68,13 +67,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     'Thanks — a ReCom specialist will reach out within one business day to map out your requirements.',
   );
 
-  activeVideoConfig = computed<VideoConfig>(() => this.videos[this.activeVideo()]);
-
-  lightboxWide = computed(() => {
-    const v = this.activeVideoConfig();
-    const url = v.url.trim();
-    return !this.isFacebook(url) && !v.portrait;
-  });
+  lightboxWide = computed(() => !this.isFacebook(this.overviewVideo.url.trim()));
 
   lightboxMediaUrl = signal<string | null>(null);
   lightboxSafeUrl = computed<SafeResourceUrl | null>(() => {
@@ -87,12 +80,14 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     return this.sanitizer.bypassSecurityTrustResourceUrl(embed);
   });
 
-  inlineIframeSrc = computed<SafeResourceUrl | null>(() => {
-    const url = this.activeVideoConfig().url.trim();
+  overviewIframeSrc = computed<SafeResourceUrl | null>(() => {
+    const url = this.overviewVideo.url.trim();
     if (!url || this.isFile(url)) return null;
     let src = url;
     if (/youtube\.com|youtu\.be/.test(src)) {
-      src += (src.includes('?') ? '&' : '?') + 'autoplay=1';
+      src = this.toYoutubeEmbed(src);
+      const join = src.includes('?') ? '&' : '?';
+      src += `${join}autoplay=1&mute=1&rel=0`;
     }
     return this.sanitizer.bypassSecurityTrustResourceUrl(src);
   });
@@ -114,26 +109,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.lightboxOpen()) this.closeVideo();
-  }
-
-  selectVideo(key: VideoKey): void {
-    this.activeVideo.set(key);
-    this.inlinePlaying.set(false);
-  }
-
-  playVideo(): void {
-    const v = this.activeVideoConfig();
-    const url = v.url.trim();
-    if (!url) return;
-
-    if (this.isFacebook(url) || v.portrait) {
-      this.lightboxMediaUrl.set(url);
-      this.lightboxOpen.set(true);
-      document.body.style.overflow = 'hidden';
-      return;
-    }
-
-    this.inlinePlaying.set(true);
   }
 
   closeVideo(): void {
@@ -214,6 +189,18 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   isFacebook(url: string): boolean {
     return /facebook\.com/.test(url);
+  }
+
+  private toYoutubeEmbed(url: string): string {
+    const watchMatch = url.match(/[?&]v=([^&]+)/);
+    if (watchMatch) {
+      return `https://www.youtube.com/embed/${watchMatch[1]}`;
+    }
+    const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+    if (shortMatch) {
+      return `https://www.youtube.com/embed/${shortMatch[1]}`;
+    }
+    return url.split('?')[0] ?? url;
   }
 
   private validate(): boolean {

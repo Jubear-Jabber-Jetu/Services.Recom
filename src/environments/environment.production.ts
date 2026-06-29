@@ -3,7 +3,7 @@ export const environment = {
   apiBaseUrl: 'https://check-tin.myrecombd.com',
   videos: {
     overview: {
-      url: 'recom-overview.mp4',
+      url: 'https://www.youtube.com/watch?v=hUaQyPTeMRE',
       title: 'Who we are, in 90 seconds',
       meta: 'WATCH · OVERVIEW',
     },

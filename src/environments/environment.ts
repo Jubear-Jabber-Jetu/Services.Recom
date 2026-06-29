@@ -3,7 +3,7 @@ export const environment = {
   apiBaseUrl: 'http://localhost:5000',
   videos: {
     overview: {
-      url: 'recom-overview.mp4',
+      url: 'https://www.youtube.com/watch?v=hUaQyPTeMRE',
       title: 'Who we are, in 90 seconds',
       meta: 'WATCH · OVERVIEW',
     },
