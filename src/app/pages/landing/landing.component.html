@@ -1,0 +1,263 @@
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="recomGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3ba3e3"/>
+      <stop offset="48%" stop-color="#2b88c3"/>
+      <stop offset="100%" stop-color="#c72235"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="atmos" aria-hidden="true"></div>
+
+<header class="nav" [class.scrolled]="navScrolled()">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#top" aria-label="ReCom Consulting Ltd. home">
+      <img class="logo-img" src="recom-header-logo.png" alt="ReCom Consulting Ltd." />
+    </a>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-left">
+      <span class="eyebrow"><span class="live-dot"></span>Provident&nbsp;Fund · Payroll · HRMS</span>
+
+      <h1 class="headline">
+        Run payroll, provident fund<br>
+        and HR <span class="grad">without the headaches.</span>
+      </h1>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="sq"></span>
+          <span class="txt">
+            <span class="num" #counterEl>{{ counterValue() }}</span>
+            HR &amp; finance teams reviewed ReCom this month
+          </span>
+        </div>
+        <div class="stat">
+          <span class="sq"></span>
+          <span class="txt">Trusted with payroll for <span class="num">25,000+</span> employees</span>
+        </div>
+        <div class="stat">
+          <span class="sq"></span>
+          <span class="txt">Provident fund &amp; payroll filed <span class="num">on time</span>, every cycle</span>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-tabs" role="tablist">
+          <button
+            type="button"
+            class="video-tab"
+            [class.active]="activeVideo() === 'overview'"
+            role="tab"
+            [attr.aria-selected]="activeVideo() === 'overview'"
+            (click)="selectVideo('overview')"
+          >
+            <span class="tnum">01</span> Company overview
+          </button>
+          <button
+            type="button"
+            class="video-tab"
+            [class.active]="activeVideo() === 'pf'"
+            role="tab"
+            [attr.aria-selected]="activeVideo() === 'pf'"
+            (click)="selectVideo('pf')"
+          >
+            <span class="tnum">02</span> Provident fund: benefits &amp; rules
+          </button>
+        </div>
+        <div class="video-stage">
+          @if (!inlinePlaying()) {
+            <div class="poster" aria-hidden="true"></div>
+            <button type="button" class="play" aria-label="Play video" (click)="playVideo()">
+              <span class="disc">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span class="label">{{ activeVideoConfig().title }}</span>
+              <span class="meta">{{ activeVideoConfig().meta }}</span>
+            </button>
+          } @else {
+            @if (isFile(activeVideoConfig().url)) {
+              <video
+                [src]="activeVideoConfig().url"
+                controls
+                autoplay
+                playsinline
+              ></video>
+            } @else if (inlineIframeSrc()) {
+              <iframe
+                [src]="inlineIframeSrc()"
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card" id="contact">
+      <img class="corner-logo" src="Recom-Logo-Web-2.png" alt="ReCom" width="40" height="40" />
+
+      <span class="viewing"><span class="dot"></span>9 people viewing this now</span>
+      <h2>Tell us what you need</h2>
+      <p class="form-sub">A specialist replies within one business day. No obligation.</p>
+
+      <form (ngSubmit)="onSubmit()" novalidate>
+        <div class="field" [class.invalid]="invalid.name">
+          <label for="name">Full name <span class="req">*</span></label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="e.g. Tahmid Rahman"
+            autocomplete="name"
+            [(ngModel)]="name"
+            (input)="clearFieldError('name')"
+          />
+          <span class="err">Please enter your name.</span>
+        </div>
+
+        <div class="field" [class.invalid]="invalid.company">
+          <label for="company">Company name <span class="req">*</span></label>
+          <input
+            id="company"
+            name="company"
+            type="text"
+            placeholder="e.g. Acme Industries Ltd."
+            autocomplete="organization"
+            [(ngModel)]="company"
+            (input)="clearFieldError('company')"
+          />
+          <span class="err">Please enter your company name.</span>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <div [class.invalid]="invalid.size">
+              <label for="size">Company size <span class="req">*</span></label>
+              <select id="size" name="size" [(ngModel)]="size" (change)="clearFieldError('size')">
+                <option value="" disabled>Select</option>
+                @for (opt of companySizes; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+              <span class="err">Select a size.</span>
+            </div>
+            <div [class.invalid]="invalid.phone">
+              <label for="phone">Phone number <span class="req">*</span></label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="+880 1XXX-XXXXXX"
+                autocomplete="tel"
+                [(ngModel)]="phone"
+                (input)="clearFieldError('phone')"
+              />
+              <span class="err">Enter a valid phone number.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" [class.invalid]="invalid.email">
+          <label for="email">Work email <span style="color:var(--faint);font-weight:500">(recommended)</span></label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@company.com"
+            autocomplete="email"
+            [(ngModel)]="email"
+            (input)="clearFieldError('email')"
+          />
+          <span class="err">Enter a valid email.</span>
+        </div>
+
+        <div class="field" [class.invalid]="invalid.services">
+          <label>Which services interest you? <span class="req">*</span></label>
+          <div class="chips">
+            @for (service of serviceOptions; track service) {
+              <span
+                class="chip"
+                [class.on]="isServiceSelected(service)"
+                tabindex="0"
+                role="checkbox"
+                [attr.aria-checked]="isServiceSelected(service)"
+                (click)="toggleService(service)"
+                (keydown)="onServiceKeydown($event, service)"
+              >
+                <span class="tick">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5">
+                    <path d="M5 12l5 5L20 6"/>
+                  </svg>
+                </span>
+                {{ service }}
+              </span>
+            }
+          </div>
+          <p class="chip-help">HRMS covers payroll, leave, attendance and HR policy in one dashboard.</p>
+          <span class="err">Pick at least one service.</span>
+        </div>
+
+        <div class="field">
+          <label for="details">Requirements / details <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+          <textarea
+            id="details"
+            name="details"
+            placeholder="Tell us about your current setup, team size, timeline or anything specific you need."
+            [(ngModel)]="details"
+          ></textarea>
+        </div>
+
+        <button class="submit" type="submit" [disabled]="submitting()">
+          <span class="mini-grid">
+            <svg width="18" height="18" viewBox="0 0 100 100" fill="none">
+              <rect x="6" y="6" width="40" height="40" rx="9" stroke="#fff" stroke-width="7"/>
+              <rect x="54" y="6" width="40" height="40" rx="9" stroke="#fff" stroke-width="7"/>
+              <rect x="6" y="54" width="40" height="40" rx="9" stroke="#fff" stroke-width="7"/>
+            </svg>
+          </span>
+          <span>{{ submitLabel() }}</span>
+        </button>
+        <p class="privacy">Your details are used only to prepare your proposal. We never share them.</p>
+      </form>
+
+      <div class="success" [class.show]="showSuccess()">
+        <img class="complete-logo" src="Recom-Logo-Web-2.png" alt="ReCom" width="64" height="64" />
+        <h3>You're on the grid.</h3>
+        <p>{{ successMessage() }}</p>
+        <button type="button" class="again" (click)="resetForm()">Submit another</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="lightbox" [class.open]="lightboxOpen()" [attr.aria-hidden]="!lightboxOpen()">
+  <div class="lb-backdrop" (click)="closeVideo()"></div>
+  <div class="lb-inner" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="lb-bar">
+      <span class="lb-title">{{ activeVideoConfig().title }}</span>
+      <button type="button" class="lb-close" aria-label="Close video" (click)="closeVideo()">&times;</button>
+    </div>
+    <div class="lb-media" [class.wide]="lightboxWide()">
+      @if (lightboxMediaUrl(); as url) {
+        @if (isFacebook(url) && lightboxSafeUrl()) {
+          <iframe
+            [src]="lightboxSafeUrl()"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write; web-share"
+            allowfullscreen
+            scrolling="no"
+          ></iframe>
+        } @else if (isFile(url)) {
+          <video [src]="url" controls autoplay playsinline></video>
+        }
+      }
+    </div>
+  </div>
+</div>
