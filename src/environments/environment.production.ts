@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  formEndpoint: 'https://your-api-domain.com/api/recom/leads',
+  apiBaseUrl: 'https://check-tin.myrecombd.com',
   videos: {
     overview: {
       url: 'recom-overview.mp4',

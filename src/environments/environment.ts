@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  formEndpoint: 'http://localhost:5000/api/recom/leads',
+  apiBaseUrl: 'http://localhost:5000',
   videos: {
     overview: {
       url: 'recom-overview.mp4',
